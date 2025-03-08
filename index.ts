@@ -1,4 +1,4 @@
-import { serve, file } from "bun";
+import { serve, file, env } from "bun";
 import { Hono } from "hono";
 import { serveStatic } from "hono/bun";
 import { getCookie, setCookie } from "hono/cookie";
@@ -9,6 +9,8 @@ import { cors } from "hono/cors";
 import { poweredBy } from "hono/powered-by";
 
 const app = new Hono().basePath("/");
+
+// console.log(env.PORT)
 
 //middleware
 app.use(logger());
