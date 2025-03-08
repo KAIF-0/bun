@@ -91,8 +91,8 @@ const schema = z.object({
 
 //using manual validation
 app.get(
-  "/zod/:email/:password",
-  validator("param", (value, c) => {
+  "/zod",
+  validator("query", (value, c) => {
     const parsed = schema.safeParse(value);
     if (!parsed.success) {
       return c.text("Invalid!", 401);
@@ -100,14 +100,14 @@ app.get(
     return parsed;
   }),
   async (c) => {
-    const { data, success } = c.req.valid("param"); //json: body, param, query
+    const { data, success } = c.req.valid("query"); //json: body, param, query
     console.log("Validated Data:", data);
     return c.json(data);
   }
 );
 
 //using zod-validator middleware
-app.get("/Zod/:email/:password", zValidator("param", schema), async (c) => {
+app.get("/zod/:email/:password", zValidator("param", schema), async (c) => {
   const validated = c.req.valid("param"); //json: body, param, query
   console.log("Validated Data:", validated);
   return c.json(validated);
