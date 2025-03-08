@@ -6,10 +6,13 @@ import { HTTPException } from "hono/http-exception";
 import { logger } from "hono/logger";
 import { decode, sign, verify } from "hono/jwt";
 import { cors } from "hono/cors";
+import { poweredBy } from "hono/powered-by";
 
 const app = new Hono().basePath("/");
-app.use(logger());
 
+//middleware
+app.use(logger());
+app.use(poweredBy())
 app.use(
   "*",
   cors({
