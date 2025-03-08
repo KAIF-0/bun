@@ -7,6 +7,9 @@ import { logger } from "hono/logger";
 import { decode, sign, verify } from "hono/jwt";
 import { cors } from "hono/cors";
 import { poweredBy } from "hono/powered-by";
+import { z } from "zod";
+import { zValidator } from "@hono/zod-validator";
+import { validator } from "hono/validator";
 
 const app = new Hono().basePath("/");
 
@@ -14,7 +17,7 @@ const app = new Hono().basePath("/");
 
 //middleware
 app.use(logger());
-app.use(poweredBy())
+app.use(poweredBy());
 app.use(
   "*",
   cors({
@@ -76,9 +79,43 @@ app.get("/verifyJwt/:token", async (c) => {
   return c.json(JSON.stringify(decodedPayload));
 });
 
+//zod
+const schema = z.object({
+  email: z.string().email().max(255),
+  password: z
+    .string()
+    .min(8, "8 Charector please!")
+    .max(20)
+    .regex(/[A-Z]/, "Must contain at least one uppercase letter"),
+});
+
+//using manual validation
+app.get(
+  "/zod/:email/:password",
+  validator("param", (value, c) => {
+    const parsed = schema.safeParse(value);
+    if (!parsed.success) {
+      return c.text("Invalid!", 401);
+    }
+    return parsed;
+  }),
+  async (c) => {
+    const { data, success } = c.req.valid("param"); //json: body, param, query
+    console.log("Validated Data:", data);
+    return c.json(data);
+  }
+);
+
+//using zod-validator middleware
+app.get("/Zod/:email/:password", zValidator("param", schema), async (c) => {
+  const validated = c.req.valid("param"); //json: body, param, query
+  console.log("Validated Data:", validated);
+  return c.json(validated);
+});
+
 //error handling
 app.onError((err, c) => {
-  console.error(err.message, err.cause);
+  console.error(err.message);
   if (err instanceof HTTPException) {
     return err.getResponse();
   }
@@ -90,10 +127,7 @@ app.notFound((c) => {
   return c.text("Page not found!", 404);
 });
 
-export default {
-  port: 3000,
-  fetch: app.fetch,
-};
+export default app;
 
 // const server = serve({
 //   port: 3000,

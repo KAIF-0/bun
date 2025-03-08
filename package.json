@@ -9,10 +9,12 @@
   },
   "private": true,
   "scripts": {
-    "start": "bun run index.ts"
+    "start": "bun run app.ts"
   },
   "type": "module",
   "dependencies": {
-    "hono": "^4.7.4"
+    "@hono/zod-validator": "^0.4.3",
+    "hono": "^4.7.4",
+    "zod": "^3.24.2"
   }
 }
