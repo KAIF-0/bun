@@ -107,7 +107,13 @@ app.get(
 );
 
 //using zod-validator middleware
-app.get("/zod/:email/:password", zValidator("param", schema), async (c) => {
+app.get("/zod/:email/:password", zValidator("param", schema, (result, c) => {    //callback
+    if (!result.success) {
+      throw new HTTPException(400, {
+        message: result?.error?.errors[0]?.message,
+      });
+    }
+  }), async (c) => {
   const validated = c.req.valid("param"); //json: body, param, query
   console.log("Validated Data:", validated);
   return c.json(validated);
